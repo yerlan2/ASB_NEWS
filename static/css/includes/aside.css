@@ -1,0 +1,17 @@
+aside.left__part {
+    margin-right: 40px;
+}
+aside.left__part hr {
+    opacity: .5;
+}
+
+aside.left__part a {
+    display: block;
+    color: #3c4043;
+    text-decoration: none;
+    padding: 10px 6px;
+}
+aside.left__part a.active {
+    color: blue;
+}
+

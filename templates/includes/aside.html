@@ -1,0 +1,12 @@
+<link rel="stylesheet" href="{{ url_for('static', filename='css/includes/aside.css') }}">
+<aside class="left__part">
+    <a class="active" href="/">All news</a>
+    <hr>
+    <a href="/search?q=COVID-19">COVID-19</a>
+    <hr>
+    {% for category in categories %}
+        <a href="/c/{{ category[1] }}">{{ category[1].capitalize() }}</a>
+    {% endfor %}
+    <hr>
+    <a href="#">About ASB</a>
+</aside>

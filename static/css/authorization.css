@@ -1,0 +1,38 @@
+
+input {
+    outline: none;
+}
+button.register {
+    display: block;
+    margin: 4px auto 0;
+    padding: 4px;
+}
+
+.errors {
+    color: #f00;
+    font-style: italic;
+    margin: 10px 15px;
+}
+
+a {
+    color: #333;
+    font-size: 18px;
+    display: block;
+    text-decoration: none;
+    margin: 20px 10px 4px;
+}
+
+.table__users, 
+.table__users td, 
+.table__users th {
+    border: 1px solid #333;
+}
+.table__users {
+    border-collapse: collapse;
+    /* margin-top: 30px; */
+}
+.table__users td, 
+.table__users th {
+    padding: 0 6px;
+}
+

@@ -1,0 +1,11 @@
+body > main.main {
+    display: grid;
+    grid-template-columns: 20% 55% 25%;
+    padding: 10px 0;
+}
+
+input, button, a {
+    outline: none;
+}
+
+

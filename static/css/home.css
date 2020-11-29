@@ -1,0 +1,36 @@
+/* .articles {} */
+
+article.news__article {
+    border: 1px solid #949494;
+    border-radius: 8px;
+    margin: 6px 0;
+    padding: 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+article.news__article a.title {
+    color: #3c4043;
+    display: block;
+    font-size: 20px;
+    font-weight: 600;
+    text-decoration: none;
+}
+
+article.news__article .image {
+    border-radius: 4px;
+    position: relative;
+    min-width:  80px;
+    min-height: 80px;
+    margin-left: 20px;
+    overflow: hidden;
+}
+
+article.news__article .image img {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    height: 100%;
+}

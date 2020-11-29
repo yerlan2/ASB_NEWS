@@ -1,0 +1,30 @@
+<link rel="stylesheet" href="{{ url_for('static', filename='css/includes/header.css') }}">
+<header>
+    <div class="container">
+
+        <div class="header__inner">
+            <div class="part">
+                <div class="burger_menu">
+                    <div></div>
+                    <div></div>
+                    <div></div>
+                </div>
+                <a class="logo" href="#"><span>ASB</span> NEWS</a>
+            </div>
+            <div class="part main__part">
+                <form method="get" action="/search" class="search">
+                    <button>Search</button>
+                    <input name="q" type="search" size="64" placeholder="Search...">
+                </form>
+                <a href="/logout" class="logout">Logout</a>
+            </div>
+        </div>
+
+    </div>
+</header>
+<div class="header"></div>
+<script>
+    let header = document.querySelector('header'),
+        divHeader = document.querySelector('.header');
+    divHeader.style.height = (header.offsetHeight) +"px";
+</script>

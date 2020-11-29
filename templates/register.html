@@ -1,0 +1,56 @@
+{% extends "base.html" %}
+
+{% block title %}Register{% endblock title %}
+
+{% block main %}
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/authorization.css') }}">
+    <form method="post">
+        <table>
+            <tr><td colspan="2"><h2 style="text-align:center;">Registration</h2></td></tr>
+            <!-- <tr>
+                <label><td>ID</td><td><input type="text" name="id"></td></label>
+            </tr> -->
+            <tr>
+                <label><td>Email</td><td><input type="email" name="email" required></td></label>
+            </tr>
+            <tr>
+                <label><td>Password</td><td><input type="password" name="password" required></td></label>
+            </tr>
+            <tr>
+                <label><td>First name</td><td><input type="text" name="first_name" required></td></label>
+            </tr>
+            <tr>
+                <label><td>Last name</td><td><input type="text" name="last_name"></td></label>
+            </tr>
+            <tr><td colspan="2"><button class="register">Register</button></td></tr>
+        </table>
+    </form>
+
+    <div class="errors">
+        {% for error in errors %}
+            <div class="error">{{ error }}</div>
+        {% endfor %}
+    </div>
+
+    <div>
+        <a href="/login">Authorization</a>
+    </div>
+
+    <table class="table__users">
+        <tr>
+            <th>ID</th>
+            <th>Username</th>
+            <th>First name</th>
+            <th>Last name</th>
+        </tr>
+        {% for user in users %}
+            <tr>
+                <td>{{ user[0] }}</td>
+                <td>{{ user[1] }}</td>
+                <td>{{ user[2] }}</td>
+                <td>{{ user[3] }}</td>
+            </tr>
+        {% endfor %}
+    </table>
+{% endblock main %}
+

@@ -1,0 +1,57 @@
+{% extends "base.html" %}
+
+{% block title %}Home{% endblock title %}
+
+{% block main %}
+    <style>
+        .table__users, 
+        .table__users td, 
+        .table__users th {
+            border: 1px solid #333;
+        }
+        .table__users {
+            border-collapse: collapse;
+        }
+        .table__users td, 
+        .table__users th {
+            padding: 0 6px;
+        }
+    </style>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/home.css') }}">
+    <!-- 
+    <table class="table__users users">
+        <tr>
+            <th>ID</th>
+            <th>Username</th>
+            <th>First name</th>
+            <th>Last name</th>
+        </tr>
+        {% for user in users %}
+            <tr>
+                <td>{{ user[0] }}</td>
+                <td>{{ user[1] }}</td>
+                <td>{{ user[2] }}</td>
+                <td>{{ user[3] }}</td>
+            </tr>
+        {% endfor %}
+    </table> -->
+    <!--
+        [0]id,          [1]source,  [2]category,    [3]author,      [4]title, 
+        [5]description, [6]url,     [7]urlToImage,  [8]publishedAt, [9]content,
+    -->
+    <div class="articles">
+        {% for article in articles %}
+            <article class="news__article">
+                <div>
+                    <a class="title" href="" target="_blank">{{ article[4] }}</a>
+                    <span>{{ article[1] }} &#x25CF; {{ article[8].strftime('%d.%m.%Y') }}</span>
+                </div>
+                <div class="image">
+                    <img src="{{ article[7] }}" alt="{{ article[0] }}">
+                </div>
+            </article>
+        {% endfor %}
+    </div>
+{% endblock main %}
+
+
