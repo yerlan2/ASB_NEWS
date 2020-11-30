@@ -41,16 +41,14 @@ def select_from_users_where(select, where, *args):
 		cur.close()
 	return users
 
-def insert_into_users(columns, *args):
-	email, password, first_name, last_name = args
-	values = ":1"
-	for i in range(1, len(args)):
-		values += ", :" + str(i+1)
+def insert_into_users(*user_data):
+	err = []
+	email, password, first_name, last_name = user_data
 	try:
 		cur = conn.cursor()
-		sql_insert = f"INSERT INTO USERS(id, {columns}) VALUES(USERS_SEQ.nextval, {values})"
-		data = (email, sha256(password.encode("UTF-8")).hexdigest(), first_name, last_name)
-		cur.execute(sql_insert, data)
+		password = sha256(password.encode("UTF-8")).hexdigest()
+		user_data = (email, password, first_name, last_name)
+		cur.callproc('users_pkg.insert_user', user_data)
 	except cx_Oracle.IntegrityError as e:
 		errorObj, = e.args
 		print('ERROR while inserting the data ', errorObj)
@@ -59,7 +57,6 @@ def insert_into_users(columns, *args):
 		return render_template('register.html', users=users, errors=err)
 	else:
 		print('Insert Completed.')
-		conn.commit()
 	finally:
 		cur.close()
 
@@ -175,7 +172,6 @@ def register():
 		first_name = request.form['first_name']
 		last_name = request.form['last_name']
 		insert_into_users(
-			"email, password, first_name, last_name",
 			 email, password, first_name, last_name
 		)
 		return redirect(url_for('register'))

@@ -86,6 +86,13 @@ CREATE OR REPLACE PACKAGE users_pkg AS
 
   FUNCTION select_all_users RETURN users_array
     PIPELINED;
+
+  PROCEDURE insert_user (
+    email        users.email%TYPE,
+    password     users.password%TYPE,
+    first_name   users.first_name%TYPE,
+    last_name    users.last_name%TYPE
+  );
 END;
 
 CREATE OR REPLACE PACKAGE BODY users_pkg AS
@@ -97,6 +104,24 @@ CREATE OR REPLACE PACKAGE BODY users_pkg AS
     FOR user IN users_cur LOOP PIPE ROW ( user );
     END LOOP;
     return;
+  END;
+
+  PROCEDURE insert_user (
+    email        users.email%TYPE,
+    password     users.password%TYPE,
+    first_name   users.first_name%TYPE,
+    last_name    users.last_name%TYPE
+  ) IS
+  BEGIN
+    INSERT INTO users VALUES (
+      users_seq.NEXTVAL,
+      email,
+      password,
+      first_name,
+      last_name
+    );
+
+    COMMIT;
   END;
 
 END;
