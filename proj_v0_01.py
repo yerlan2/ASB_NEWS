@@ -42,6 +42,7 @@ def select_from_users_where(select, where, *args):
 	return users
 
 def insert_into_users(columns, *args):
+	err = []
 	email, password, first_name, last_name = args
 	values = ":1"
 	for i in range(1, len(args)):
@@ -55,13 +56,12 @@ def insert_into_users(columns, *args):
 		errorObj, = e.args
 		print('ERROR while inserting the data ', errorObj)
 		err.append("Username already exists.")
-		users = select_from_users('id, email, first_name, last_name')
-		return render_template('register.html', users=users, errors=err)
 	else:
 		print('Insert Completed.')
 		conn.commit()
 	finally:
 		cur.close()
+	return err
 
 def select_from_categories():
 	try:
@@ -155,15 +155,18 @@ def category_page(name):
 @app.route('/search', methods=['GET'])
 def search():
 	err = []
-	if request.method == 'GET':
-		q = request.args['q'].lower()
-		users = select_from_users('id, email, first_name, last_name')
-		articles = select_from_articles_where(
-			'articles.id, sources.name, categories.name, author, title, description, url, urlToImage, publishedAt, content', 
-			f"(LOWER(title) LIKE '%{q}%' OR LOWER(description) LIKE '%{q}%' OR LOWER(categories.name) LIKE '%{q}%' OR LOWER(sources.name) LIKE '%{q}%' OR LOWER(author) LIKE '%{q}%' OR LOWER(content) LIKE '%{q}%' )"
-		)
-		categories = select_from_categories()
-		return render_template('home.html', users=users, articles=articles, categories=categories)
+	if 'email' in session and 'password' in session:
+		if request.method == 'GET':
+			q = request.args['q'].lower()
+			users = select_from_users('id, email, first_name, last_name')
+			articles = select_from_articles_where(
+				'articles.id, sources.name, categories.name, author, title, description, url, urlToImage, publishedAt, content', 
+				f"(LOWER(title) LIKE '%{q}%' OR LOWER(description) LIKE '%{q}%' OR LOWER(categories.name) LIKE '%{q}%' OR LOWER(sources.name) LIKE '%{q}%' OR LOWER(author) LIKE '%{q}%' OR LOWER(content) LIKE '%{q}%' )"
+			)
+			categories = select_from_categories()
+			return render_template('home.html', users=users, articles=articles, categories=categories)
+	else:
+		return redirect('/login')
 
 
 @app.route('/register', methods=['POST', 'GET'])
@@ -174,11 +177,15 @@ def register():
 		password = request.form['password']
 		first_name = request.form['first_name']
 		last_name = request.form['last_name']
-		insert_into_users(
+		err = insert_into_users(
 			"email, password, first_name, last_name",
-			 email, password, first_name, last_name
+			email, password, first_name, last_name
 		)
-		return redirect(url_for('register'))
+		if len(err) <= 0:
+			return redirect(url_for('register'))
+		else:
+			users = select_from_users('id, email, first_name, last_name')
+			return render_template('register.html', users=users, errors=err)
 	else:
 		users = select_from_users('id, email, first_name, last_name')
 		categories = select_from_categories()
@@ -188,25 +195,29 @@ def register():
 @app.route('/login', methods=['POST', 'GET'])
 def login():
 	err = []
-	if request.method == 'POST':
-		email = request.form['email']
-		password = sha256(request.form['password'].encode("UTF-8")).hexdigest()
-		users = select_from_users_where(
-			"id, email, first_name, last_name", 
-			"email=:1 AND password=:2", 
-			email, password
-		)
-		if len(users) > 0:
-			session['email'] = email
-			session['password'] = password
-			return redirect("/")
+	if 'email' in session and 'password' in session:
+		if request.method == 'POST':
+			email = request.form['email']
+			password = sha256(request.form['password'].encode("UTF-8")).hexdigest()
+			users = select_from_users_where(
+				"id, email, first_name, last_name", 
+				"email=:1 AND password=:2", 
+				email, password
+			)
+			categories = select_from_categories()
+			if len(users) > 0:
+				session['email'] = email
+				session['password'] = password
+				return redirect("/")
+			else:
+				err.append("Username OR password is incorrect.")
+				return render_template('login.html', categories=categories, errors=err)
+			# return redirect('/login')
 		else:
-			err.append("Username OR password is incorrect.")
-			return render_template('login.html', errors=err)
-		# return redirect('/login')
+			categories = select_from_categories()
+			return render_template('login.html', categories=categories)
 	else:
-		categories = select_from_categories()
-		return render_template('login.html', categories=categories)
+		return redirect('/login')
 
 
 @app.route('/logout')

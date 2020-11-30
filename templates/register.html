@@ -5,8 +5,8 @@
 {% block main %}
     <link rel="stylesheet" href="{{ url_for('static', filename='css/authorization.css') }}">
     <form method="post">
-        <table>
-            <tr><td colspan="2"><h2 style="text-align:center;">Registration</h2></td></tr>
+        <table class="authorization-table">
+            <tr><td colspan="2"><h2 style="text-align:center; margin-bottom:8px;">Registration</h2></td></tr>
             <!-- <tr>
                 <label><td>ID</td><td><input type="text" name="id"></td></label>
             </tr> -->
@@ -22,7 +22,7 @@
             <tr>
                 <label><td>Last name</td><td><input type="text" name="last_name"></td></label>
             </tr>
-            <tr><td colspan="2"><button class="register">Register</button></td></tr>
+            <tr><td colspan="2"><button class="authorization-button">Register</button></td></tr>
         </table>
     </form>
 

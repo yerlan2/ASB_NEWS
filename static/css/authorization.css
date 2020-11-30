@@ -1,11 +1,34 @@
+main.page {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+main.page form {
+    margin-top: 50px;
+}
 
 input {
     outline: none;
 }
-button.register {
+table.authorization-table input {
+    margin: 4px 0 4px 8px;
+    padding: 6px;
+    border: 1px solid #949494;
+    border-radius: 6px;
+}
+button.authorization-button {
     display: block;
-    margin: 4px auto 0;
-    padding: 4px;
+    background: #8383ff;
+    border: 2px solid #5050ff;
+    border-radius: 200px;
+    color: #fff;
+    cursor: pointer;
+    padding: 6px 20px;
+    margin: 8px auto 0;
+    transition: .2s;
+}
+button.authorization-button:hover {
+    background: #5050ff;
 }
 
 .errors {
