@@ -29,31 +29,31 @@ CREATE SEQUENCE USERS_SEQ;
 
 
 
-DROP TABLE ARTICLES;
-DROP SEQUENCE ARTICLES_SEQ;
-DROP TABLE CATEGORIES;
-DROP SEQUENCE CATEGORIES_SEQ;
-DROP TABLE SOURCES;
-DROP SEQUENCE SOURCES_SEQ;
+-- DROP TABLE ARTICLES;
+-- DROP SEQUENCE ARTICLES_SEQ;
+-- DROP TABLE CATEGORIES;
+-- DROP SEQUENCE CATEGORIES_SEQ;
+-- DROP TABLE SOURCES;
+-- DROP SEQUENCE SOURCES_SEQ;
 
-CREATE SEQUENCE SOURCES_SEQ;
-/* */
+-- CREATE SEQUENCE SOURCES_SEQ;
+/* 
 CREATE TABLE SOURCES (
     id      NUMBER PRIMARY KEY,
     name    VARCHAR2(255) NOT NULL UNIQUE
 );
 /* */
 
-CREATE SEQUENCE CATEGORIES_SEQ;
-/* */
+-- CREATE SEQUENCE CATEGORIES_SEQ;
+/* 
 CREATE TABLE CATEGORIES (
     id      NUMBER PRIMARY KEY,
     name    VARCHAR2(255) NOT NULL UNIQUE
 );
 /* */
 
-CREATE SEQUENCE ARTICLES_SEQ;
-/* */
+-- CREATE SEQUENCE ARTICLES_SEQ;
+/* 
 CREATE TABLE ARTICLES (
     id              NUMBER PRIMARY KEY,
     source_id       NUMBER NOT NULL,
@@ -69,3 +69,59 @@ CREATE TABLE ARTICLES (
     content         VARCHAR2(4000)
 );
 /* */
+
+
+CREATE OR REPLACE PACKAGE users_pkg AS
+  CURSOR users_cur IS
+  SELECT
+    id,
+    email,
+    first_name,
+    last_name
+  FROM
+    users;
+
+  TYPE users_array IS
+    TABLE OF users_cur%rowtype;
+
+  FUNCTION select_all_users RETURN users_array
+    PIPELINED;
+
+  PROCEDURE insert_user (
+    email        users.email%TYPE,
+    password     users.password%TYPE,
+    first_name   users.first_name%TYPE,
+    last_name    users.last_name%TYPE
+  );
+END;
+/
+
+CREATE OR REPLACE PACKAGE BODY users_pkg AS
+  FUNCTION select_all_users RETURN users_array
+    PIPELINED
+  IS
+  BEGIN
+    FOR user IN users_cur LOOP PIPE ROW ( user );
+    END LOOP;
+    return;
+  END;
+
+  PROCEDURE insert_user (
+    email        users.email%TYPE,
+    password     users.password%TYPE,
+    first_name   users.first_name%TYPE,
+    last_name    users.last_name%TYPE
+  ) IS
+  BEGIN
+    INSERT INTO users VALUES (
+      users_seq.NEXTVAL,
+      email,
+      password,
+      first_name,
+      last_name
+    );
+    COMMIT;
+  END;
+END;
+/
+

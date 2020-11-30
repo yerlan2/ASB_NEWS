@@ -12,10 +12,10 @@ app = Flask(__name__)
 app.secret_key = "secret_key"
 
 
-def select_from_users(select):
+def select_from_users():
 	try:
 		cur = conn.cursor()
-		sql_select = f"SELECT {select} FROM USERS"	
+		sql_select = "SELECT * FROM TABLE ( users_pkg.select_all_users() )"
 		cur.execute(sql_select)
 		users = cur.fetchall()
 	except Exception as err:
@@ -41,24 +41,20 @@ def select_from_users_where(select, where, *args):
 		cur.close()
 	return users
 
-def insert_into_users(columns, *args):
+def insert_into_users(*user_data):
 	err = []
-	email, password, first_name, last_name = args
-	values = ":1"
-	for i in range(1, len(args)):
-		values += ", :" + str(i+1)
+	email, password, first_name, last_name = user_data
 	try:
 		cur = conn.cursor()
-		sql_insert = f"INSERT INTO USERS(id, {columns}) VALUES(USERS_SEQ.nextval, {values})"
-		data = (email, sha256(password.encode("UTF-8")).hexdigest(), first_name, last_name)
-		cur.execute(sql_insert, data)
+		password = sha256(password.encode("UTF-8")).hexdigest()
+		user_data = (email, password, first_name, last_name)
+		cur.callproc('users_pkg.insert_user', user_data)
 	except cx_Oracle.IntegrityError as e:
 		errorObj, = e.args
 		print('ERROR while inserting the data ', errorObj)
 		err.append("Username already exists.")
 	else:
 		print('Insert Completed.')
-		conn.commit()
 	finally:
 		cur.close()
 	return err
@@ -158,7 +154,7 @@ def search():
 	if 'email' in session and 'password' in session:
 		if request.method == 'GET':
 			q = request.args['q'].lower()
-			users = select_from_users('id, email, first_name, last_name')
+			users = select_from_users()
 			articles = select_from_articles_where(
 				'articles.id, sources.name, categories.name, author, title, description, url, urlToImage, publishedAt, content', 
 				f"(LOWER(title) LIKE '%{q}%' OR LOWER(description) LIKE '%{q}%' OR LOWER(categories.name) LIKE '%{q}%' OR LOWER(sources.name) LIKE '%{q}%' OR LOWER(author) LIKE '%{q}%' OR LOWER(content) LIKE '%{q}%' )"
@@ -178,16 +174,15 @@ def register():
 		first_name = request.form['first_name']
 		last_name = request.form['last_name']
 		err = insert_into_users(
-			"email, password, first_name, last_name",
 			email, password, first_name, last_name
 		)
 		if len(err) <= 0:
 			return redirect(url_for('register'))
 		else:
-			users = select_from_users('id, email, first_name, last_name')
+			users = select_from_users()
 			return render_template('register.html', users=users, errors=err)
 	else:
-		users = select_from_users('id, email, first_name, last_name')
+		users = select_from_users()
 		categories = select_from_categories()
 		return render_template('register.html', users=users, categories=categories)
 
@@ -195,29 +190,26 @@ def register():
 @app.route('/login', methods=['POST', 'GET'])
 def login():
 	err = []
-	if 'email' in session and 'password' in session:
-		if request.method == 'POST':
-			email = request.form['email']
-			password = sha256(request.form['password'].encode("UTF-8")).hexdigest()
-			users = select_from_users_where(
-				"id, email, first_name, last_name", 
-				"email=:1 AND password=:2", 
-				email, password
-			)
-			categories = select_from_categories()
-			if len(users) > 0:
-				session['email'] = email
-				session['password'] = password
-				return redirect("/")
-			else:
-				err.append("Username OR password is incorrect.")
-				return render_template('login.html', categories=categories, errors=err)
-			# return redirect('/login')
+	if request.method == 'POST':
+		email = request.form['email']
+		password = sha256(request.form['password'].encode("UTF-8")).hexdigest()
+		users = select_from_users_where(
+			"id, email, first_name, last_name", 
+			"email=:1 AND password=:2", 
+			email, password
+		)
+		categories = select_from_categories()
+		if len(users) > 0:
+			session['email'] = email
+			session['password'] = password
+			return redirect("/")
 		else:
-			categories = select_from_categories()
-			return render_template('login.html', categories=categories)
+			err.append("Username OR password is incorrect.")
+			return render_template('login.html', categories=categories, errors=err)
+		# return redirect('/login')
 	else:
-		return redirect('/login')
+		categories = select_from_categories()
+		return render_template('login.html', categories=categories)
 
 
 @app.route('/logout')
