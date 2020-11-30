@@ -69,3 +69,34 @@ CREATE TABLE ARTICLES (
     content         VARCHAR2(4000)
 );
 /* */
+
+
+CREATE OR REPLACE PACKAGE users_pkg AS
+  CURSOR users_cur IS
+  SELECT
+    id,
+    email,
+    first_name,
+    last_name
+  FROM
+    users;
+
+  TYPE users_array IS
+    TABLE OF users_cur%rowtype;
+
+  FUNCTION select_all_users RETURN users_array
+    PIPELINED;
+END;
+
+CREATE OR REPLACE PACKAGE BODY users_pkg AS
+
+  FUNCTION select_all_users RETURN users_array
+    PIPELINED
+  IS
+  BEGIN
+    FOR user IN users_cur LOOP PIPE ROW ( user );
+    END LOOP;
+    return;
+  END;
+
+END;

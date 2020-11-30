@@ -12,10 +12,10 @@ app = Flask(__name__)
 app.secret_key = "secret_key"
 
 
-def select_from_users(select):
+def select_from_users():
 	try:
 		cur = conn.cursor()
-		sql_select = f"SELECT {select} FROM USERS"	
+		sql_select = "SELECT * FROM TABLE ( users_pkg.select_all_users() )"
 		cur.execute(sql_select)
 		users = cur.fetchall()
 	except Exception as err:
@@ -55,7 +55,7 @@ def insert_into_users(columns, *args):
 		errorObj, = e.args
 		print('ERROR while inserting the data ', errorObj)
 		err.append("Username already exists.")
-		users = select_from_users('id, email, first_name, last_name')
+		users = select_from_users()
 		return render_template('register.html', users=users, errors=err)
 	else:
 		print('Insert Completed.')
@@ -157,7 +157,7 @@ def search():
 	err = []
 	if request.method == 'GET':
 		q = request.args['q'].lower()
-		users = select_from_users('id, email, first_name, last_name')
+		users = select_from_users()
 		articles = select_from_articles_where(
 			'articles.id, sources.name, categories.name, author, title, description, url, urlToImage, publishedAt, content', 
 			f"(LOWER(title) LIKE '%{q}%' OR LOWER(description) LIKE '%{q}%' OR LOWER(categories.name) LIKE '%{q}%' OR LOWER(sources.name) LIKE '%{q}%' OR LOWER(author) LIKE '%{q}%' OR LOWER(content) LIKE '%{q}%' )"
@@ -180,7 +180,7 @@ def register():
 		)
 		return redirect(url_for('register'))
 	else:
-		users = select_from_users('id, email, first_name, last_name')
+		users = select_from_users()
 		categories = select_from_categories()
 		return render_template('register.html', users=users, categories=categories)
 
