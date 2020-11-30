@@ -125,3 +125,47 @@ CREATE OR REPLACE PACKAGE BODY users_pkg AS
 END;
 /
 
+
+CREATE OR REPLACE PROCEDURE insert_article (
+    source      VARCHAR2, 
+    category    VARCHAR2, 
+    author      VARCHAR2,
+    title       VARCHAR2,
+    description VARCHAR2,
+    url         VARCHAR2,
+    urlToImage  VARCHAR2,
+    publishedAt DATE,
+    content     VARCHAR2
+) IS 
+    source_id NUMBER := NULL;
+    category_id NUMBER := NULL;
+BEGIN 
+    BEGIN 
+        SELECT id INTO source_id FROM SOURCES WHERE name=source;
+    Exception
+        WHEN no_data_found THEN
+            source_id := NULL;
+    END;
+
+    BEGIN 
+        SELECT id INTO category_id FROM CATEGORIES WHERE name=category;
+    Exception
+        WHEN no_data_found THEN
+            category_id := NULL;
+    END;
+
+    IF source_id IS NULL THEN
+        INSERT INTO SOURCES VALUES(SOURCES_SEQ.NEXTVAL, source);
+        source_id := SOURCES_SEQ.currval;
+    END IF;
+
+    IF category_id IS NULL THEN
+        INSERT INTO SOURCES VALUES(CATEGORIES_SEQ.NEXTVAL, category);
+        category_id := CATEGORIES_SEQ.currval;
+    END IF;
+
+    INSERT INTO ARTICLES VALUES(ARTICLES_SEQ.NEXTVAL, source_id, category_id, author, title, description, url, urlToImage, publishedAt, content);
+    COMMIT;
+END;
+/
+
