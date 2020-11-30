@@ -216,8 +216,8 @@ def login():
 @app.route('/logout')
 def logout():
 	if 'email' in session and 'password' in session:
-	del session['email']
-	del session['password']
+		del session['email']
+		del session['password']
 	return redirect('/login')
 
 
