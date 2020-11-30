@@ -42,16 +42,31 @@
     <div class="articles">
         {% for article in articles %}
             <article class="news__article">
-                <div>
-                    <a class="title" href="" target="_blank">{{ article[4] }}</a>
-                    <span>{{ article[1] }} &#x25CF; {{ article[8].strftime('%d.%m.%Y') }}</span>
+                <input type="hidden" name="id" value="{{ article[0] }}">
+                <div class="info-main">
+                    <div>
+                        <div>
+                            <a class="title" href="{{ article[6] }}" target="_blank">{{ article[4] }}</a>
+                            {{ article[1] }} &#x25CF; {{ article[8].strftime('%d.%m.%Y') }}
+                        </div>
+                        <div class="show_more" onclick="show_more(event)">MORE</div>
+                    </div>
+                    <div class="image">
+                        <img src="{{ article[7] }}" alt="{{ article[0] }}">
+                    </div>
                 </div>
-                <div class="image">
-                    <img src="{{ article[7] }}" alt="{{ article[0] }}">
+                <div class="info-more">
+                    {{ article[5] }}
                 </div>
             </article>
         {% endfor %}
     </div>
+    <script>
+        function show_more(event) {
+            let infoMore = event.currentTarget.parentNode.parentNode.parentNode.querySelector('.info-more');
+            infoMore.classList.toggle('show');
+        }
+    </script>
 {% endblock main %}
 
 

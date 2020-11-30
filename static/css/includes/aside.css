@@ -14,4 +14,7 @@ aside.left__part a {
 aside.left__part a.active {
     color: blue;
 }
+aside.left__part a.bttm {
+    font-size: 13px;
+}
 

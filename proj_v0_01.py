@@ -113,7 +113,7 @@ def select_from_articles_where(select, where, *args):
 @app.route('/home')
 def index():
 	err = []
-	if session['email'] is not None and session['password'] is not None:
+	if 'email' in session and 'password' in session:
 		email = session['email']
 		password = session['password']
 		users = select_from_users_where(
@@ -134,7 +134,7 @@ def index():
 @app.route('/c/<string:name>')
 def category_page(name):
 	err = []
-	if session['email'] is not None and session['password'] is not None:
+	if 'email' in session and 'password' in session:
 		email = session['email']
 		password = session['password']
 		users = select_from_users_where(
@@ -211,7 +211,8 @@ def login():
 
 @app.route('/logout')
 def logout():
-	session['email'], session['password'] = None, None
+	del session['email']
+	del session['password']
 	return redirect('/login')
 
 

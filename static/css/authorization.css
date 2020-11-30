@@ -14,7 +14,7 @@ button.register {
     margin: 10px 15px;
 }
 
-a {
+main.page > div > a {
     color: #333;
     font-size: 18px;
     display: block;

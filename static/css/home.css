@@ -5,9 +5,27 @@ article.news__article {
     border-radius: 8px;
     margin: 6px 0;
     padding: 20px;
+}
+
+article.news__article .info-main {
     display: flex;
     justify-content: space-between;
     align-items: center;
+}
+article.news__article .info-main .show_more {
+    margin-top: 4px;
+    color: #00f;
+    cursor: pointer;
+    user-select: none;
+}
+
+article.news__article .info-more {
+    display: none;
+    font-size: 15px;
+    margin-top: 10px;
+}
+article.news__article .info-more.show {
+    display: block;
 }
 
 article.news__article a.title {
