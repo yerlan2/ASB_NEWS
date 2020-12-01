@@ -169,3 +169,27 @@ BEGIN
 END;
 /
 
+CREATE OR REPLACE PACKAGE categories_pkg AS
+  CURSOR categories_cur IS
+    SELECT * FROM categories;
+
+  TYPE categories_array IS
+    TABLE OF categories_cur%rowtype;
+  FUNCTION select_all_categories RETURN categories_array
+    PIPELINED;
+END;
+/
+
+CREATE OR REPLACE PACKAGE BODY categories_pkg AS
+
+  FUNCTION select_all_categories RETURN categories_array
+    PIPELINED
+  IS
+  BEGIN
+    FOR user IN categories_cur LOOP PIPE ROW ( user );
+    END LOOP;
+    return;
+  END;
+
+END;
+/

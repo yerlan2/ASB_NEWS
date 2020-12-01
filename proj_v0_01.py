@@ -63,7 +63,7 @@ def insert_into_users(*user_data):
 def select_from_categories():
 	try:
 		cur = conn.cursor()
-		sql_select = "SELECT * FROM CATEGORIES"	
+		sql_select = "SELECT * FROM TABLE ( categories_pkg.select_all_categories() )"
 		cur.execute(sql_select)
 		categories = cur.fetchall()
 	except Exception as err:
