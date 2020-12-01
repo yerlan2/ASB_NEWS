@@ -28,6 +28,7 @@ def select_from_users():
 	return users
 
 def select_user_where(*user_credentials):
+	users = []
 	try:
 		cur = conn.cursor()
 		p_email, p_password = ':1', ':2'
@@ -38,9 +39,10 @@ def select_user_where(*user_credentials):
 		print('Exception occured while fetching the records ', err)
 	else:
 		print('Query Completed.')
-		return users
 	finally:
 		cur.close()
+	return users
+	
 
 def insert_into_users(*user_data):
 	err = []
@@ -61,6 +63,7 @@ def insert_into_users(*user_data):
 	return err
 
 def select_from_categories():
+	categories = []
 	try:
 		cur = conn.cursor()
 		sql_select = "SELECT * FROM TABLE ( categories_pkg.select_all_categories() )"
