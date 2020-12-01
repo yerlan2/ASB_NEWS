@@ -122,7 +122,7 @@ def index():
 			return render_template('login.html', errors=err)
 		articles = select_from_articles('articles.id, sources.name, categories.name, author, title, description, url, urlToImage, publishedAt, content')
 		categories = select_from_categories()
-		return render_template('home.html', users=users, articles=articles, categories=categories)
+		return render_template('home.html', session=session, users=users, articles=articles, categories=categories)
 	else:
 		return redirect('/login')
 
@@ -141,9 +141,9 @@ def category_page(name):
 		if len(users) <= 0:
 			err.append("Username OR password is incorrect.")
 			return render_template('login.html', errors=err)
-		articles = select_from_articles_where('articles.id, sources.name, categories.name, author, title, description, url, urlToImage, publishedAt, content', 'categories.name=:1', name)
 		categories = select_from_categories()
-		return render_template('home.html', users=users, articles=articles, categories=categories)
+		articles = select_from_articles_where('articles.id, sources.name, categories.name, author, title, description, url, urlToImage, publishedAt, content', 'categories.name=:1', name)
+		return render_template('home.html', session=session, users=users, categories=categories, articles=articles)
 	else:
 		return redirect('/login')
 
@@ -152,15 +152,21 @@ def category_page(name):
 def search():
 	err = []
 	if 'email' in session and 'password' in session:
+		email = session['email']
+		password = session['password']
 		if request.method == 'GET':
 			q = request.args['q'].lower()
-			users = select_from_users()
+			users = select_from_users_where(
+				"id, email, first_name, last_name", 
+				"email=:1 AND password=:2", 
+				email, password
+			)
 			articles = select_from_articles_where(
 				'articles.id, sources.name, categories.name, author, title, description, url, urlToImage, publishedAt, content', 
 				f"(LOWER(title) LIKE '%{q}%' OR LOWER(description) LIKE '%{q}%' OR LOWER(categories.name) LIKE '%{q}%' OR LOWER(sources.name) LIKE '%{q}%' OR LOWER(author) LIKE '%{q}%' OR LOWER(content) LIKE '%{q}%' )"
 			)
 			categories = select_from_categories()
-			return render_template('home.html', users=users, articles=articles, categories=categories)
+			return render_template('home.html', session=session, users=users, articles=articles, categories=categories)
 	else:
 		return redirect('/login')
 
@@ -168,6 +174,7 @@ def search():
 @app.route('/register', methods=['POST', 'GET'])
 def register():
 	err = []
+	categories = select_from_categories()
 	if request.method == 'POST':
 		email = request.form['email']
 		password = request.form['password']
@@ -179,12 +186,9 @@ def register():
 		if len(err) <= 0:
 			return redirect(url_for('register'))
 		else:
-			users = select_from_users()
-			return render_template('register.html', users=users, errors=err)
+			return render_template('register.html', categories=categories, errors=err)
 	else:
-		users = select_from_users()
-		categories = select_from_categories()
-		return render_template('register.html', users=users, categories=categories)
+		return render_template('register.html', categories=categories)
 
 
 @app.route('/login', methods=['POST', 'GET'])
@@ -202,6 +206,9 @@ def login():
 		if len(users) > 0:
 			session['email'] = email
 			session['password'] = password
+			if session['email']=='admin@email.com' \
+			and session['password']==sha256('admin'.encode("UTF-8")).hexdigest():
+				return redirect("/admin")
 			return redirect("/")
 		else:
 			err.append("Username OR password is incorrect.")
@@ -217,6 +224,22 @@ def logout():
 	del session['email']
 	del session['password']
 	return redirect('/login')
+
+
+@app.route('/admin', methods=['POST', 'GET'])
+def admin():
+	err = []
+	if request.method == 'POST':
+		print('Hello')
+	else:
+		if 'email' in session \
+		and 'password' in session \
+		and session['email']=='admin@email.com' \
+		and session['password']==sha256('admin'.encode("UTF-8")).hexdigest():
+			categories = select_from_categories()
+			return render_template('admin.html', session=session, categories=categories)
+		else:
+			return redirect('/logout')
 
 
 if __name__=="__main__":

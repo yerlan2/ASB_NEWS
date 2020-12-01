@@ -11,16 +11,16 @@
                 <label><td>ID</td><td><input type="text" name="id"></td></label>
             </tr> -->
             <tr>
-                <label><td>Email</td><td><input type="email" name="email" required></td></label>
+                <label><td>Email</td><td><input type="email" name="email" size="32" required></td></label>
             </tr>
             <tr>
-                <label><td>Password</td><td><input type="password" name="password" required></td></label>
+                <label><td>Password</td><td><input type="password" name="password" size="32" required></td></label>
             </tr>
             <tr>
-                <label><td>First name</td><td><input type="text" name="first_name" required></td></label>
+                <label><td>First name</td><td><input type="text" name="first_name" size="32" required></td></label>
             </tr>
             <tr>
-                <label><td>Last name</td><td><input type="text" name="last_name"></td></label>
+                <label><td>Last name</td><td><input type="text" name="last_name" size="32"></td></label>
             </tr>
             <tr><td colspan="2"><button class="authorization-button">Register</button></td></tr>
         </table>
@@ -33,24 +33,7 @@
     </div>
 
     <div>
-        <a href="/login">Authorization</a>
+        If you have an account, <a href="/login">Authorization</a>
     </div>
-
-    <table class="table__users">
-        <tr>
-            <th>ID</th>
-            <th>Username</th>
-            <th>First name</th>
-            <th>Last name</th>
-        </tr>
-        {% for user in users %}
-            <tr>
-                <td>{{ user[0] }}</td>
-                <td>{{ user[1] }}</td>
-                <td>{{ user[2] }}</td>
-                <td>{{ user[3] }}</td>
-            </tr>
-        {% endfor %}
-    </table>
 {% endblock main %}
 

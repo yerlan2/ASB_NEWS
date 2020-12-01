@@ -74,6 +74,7 @@ header {
     margin-left: 8px;
     outline: none;
 }
-.header__inner .logout {
+.header__inner .header-option {
+    color: #3c4043;
     text-decoration: none;
 }

@@ -4,18 +4,25 @@ main.page {
     align-items: center;
 }
 main.page form {
-    margin-top: 50px;
+    margin-top: 10px;
+    width: 80%;
+}
+table.authorization-table {
+    width: 100%;
 }
 
 input {
     outline: none;
 }
-table.authorization-table input {
+table.authorization-table input,
+table.authorization-table textarea {
     margin: 4px 0 4px 8px;
     padding: 6px;
     border: 1px solid #949494;
     border-radius: 6px;
+    width: 100%;
 }
+
 button.authorization-button {
     display: block;
     background: #8383ff;
@@ -40,5 +47,9 @@ button.authorization-button:hover {
 main.page > div > a {
     color: #333;
     font-size: 18px;
+    display: block;
+    text-decoration: none;
+    margin: 20px 10px 4px;
 }
+
 

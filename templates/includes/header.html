@@ -16,7 +16,20 @@
                     <button>Search</button>
                     <input name="q" type="search" size="64" placeholder="Search...">
                 </form>
-                <a href="/logout" class="logout">Logout</a>
+                <div>
+                    {% if 'email' in session %}
+                        {% if session['email']=='admin@email.com' %}
+                            <a href="/admin" class="header-option">Admin</a> |
+                        {# 
+                        {% else %}    
+                            <a href="#" class="header-option">#</a> 
+                        #}
+                        {% endif %}
+                        <a href="/logout" class="header-option">Logout</a>
+                    {% else %}
+                        <a href="/login" class="header-option">Login</a> | <a href="/register" class="header-option">Register</a>
+                    {% endif %}
+                </div>
             </div>
         </div>
 

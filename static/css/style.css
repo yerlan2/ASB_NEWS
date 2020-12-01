@@ -4,9 +4,12 @@
     padding: 0;
     font-family: sans-serif;
 }
+body {
+    overflow-y: scroll;
+}
+
 .container {
     margin: 0 auto;
     width: 1400px;
 }
-
 
