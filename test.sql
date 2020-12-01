@@ -87,6 +87,30 @@ CREATE OR REPLACE PACKAGE users_pkg AS
   FUNCTION select_all_users RETURN users_array
     PIPELINED;
 
+  CURSOR user_cur (
+    p_email      users.email%TYPE,
+    p_password   users.password%TYPE
+  ) IS
+  SELECT
+    id,
+    email,
+    first_name,
+    last_name
+  FROM
+    users
+  WHERE
+    email = p_email
+    AND password = p_password;
+
+  TYPE user_array IS
+    TABLE OF user_cur%rowtype;
+
+  FUNCTION select_user_where (
+    email      users.email%TYPE,
+    password   users.password%TYPE
+  ) RETURN user_array
+    PIPELINED;
+
   PROCEDURE insert_user (
     email        users.email%TYPE,
     password     users.password%TYPE,
@@ -103,6 +127,19 @@ CREATE OR REPLACE PACKAGE BODY users_pkg AS
   BEGIN
     FOR user IN users_cur LOOP PIPE ROW ( user );
     END LOOP;
+    return;
+  END;
+
+  FUNCTION select_user_where (
+    email      users.email%TYPE,
+    password   users.password%TYPE
+  ) RETURN user_array
+    PIPELINED
+  IS
+  BEGIN
+    FOR user IN user_cur(email, password) LOOP PIPE ROW ( user );
+    END LOOP;
+
     return;
   END;
 
