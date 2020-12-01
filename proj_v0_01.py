@@ -27,20 +27,20 @@ def select_from_users():
 		cur.close()
 	return users
 
-def select_from_users_where(select, where, *args):
+def select_user_where(*user_credentials):
 	try:
 		cur = conn.cursor()
-		sql_select = f"SELECT {select} FROM USERS WHERE {where}"
-		data = tuple(args)
-		cur.execute(sql_select, data)
+		p_email, p_password = ':1', ':2'
+		sql_select = f"SELECT * FROM TABLE ( users_pkg.select_user_where({p_email}, {p_password}) )"
+		cur.execute(sql_select, user_credentials)
 		users = cur.fetchall()
 	except Exception as err:
 		print('Exception occured while fetching the records ', err)
 	else:
 		print('Query Completed.')
+		return users
 	finally:
 		cur.close()
-	return users
 
 def insert_into_users(*user_data):
 	err = []
@@ -63,7 +63,7 @@ def insert_into_users(*user_data):
 def select_from_categories():
 	try:
 		cur = conn.cursor()
-		sql_select = "SELECT * FROM CATEGORIES"	
+		sql_select = "SELECT * FROM TABLE ( categories_pkg.select_all_categories() )"
 		cur.execute(sql_select)
 		categories = cur.fetchall()
 	except Exception as err:
@@ -130,11 +130,7 @@ def index():
 	if 'email' in session and 'password' in session:
 		email = session['email']
 		password = session['password']
-		users = select_from_users_where(
-			"id, email, first_name, last_name", 
-			"email=:1 AND password=:2", 
-			email, password
-		)
+		users = select_user_where(email, password)
 		if len(users) <= 0:
 			err.append("Username OR password is incorrect.")
 			return render_template('login.html', errors=err)
@@ -151,11 +147,7 @@ def category_page(name):
 	if 'email' in session and 'password' in session:
 		email = session['email']
 		password = session['password']
-		users = select_from_users_where(
-			"id, email, first_name, last_name", 
-			"email=:1 AND password=:2", 
-			email, password
-		)
+		users = select_user_where(email, password)
 		if len(users) <= 0:
 			err.append("Username OR password is incorrect.")
 			return render_template('login.html', errors=err)
@@ -174,11 +166,7 @@ def search():
 		password = session['password']
 		if request.method == 'GET':
 			q = request.args['q'].lower()
-			users = select_from_users_where(
-				"id, email, first_name, last_name", 
-				"email=:1 AND password=:2", 
-				email, password
-			)
+			users = select_user_where(email, password)
 			articles = select_from_articles_where(
 				'articles.id, sources.name, categories.name, author, title, description, url, urlToImage, publishedAt, content', 
 				f"(LOWER(title) LIKE '%{q}%' OR LOWER(description) LIKE '%{q}%' OR LOWER(categories.name) LIKE '%{q}%' OR LOWER(sources.name) LIKE '%{q}%' OR LOWER(author) LIKE '%{q}%' OR LOWER(content) LIKE '%{q}%' )"
@@ -215,11 +203,7 @@ def login():
 	if request.method == 'POST':
 		email = request.form['email']
 		password = sha256(request.form['password'].encode("UTF-8")).hexdigest()
-		users = select_from_users_where(
-			"id, email, first_name, last_name", 
-			"email=:1 AND password=:2", 
-			email, password
-		)
+		users = select_user_where(email, password)
 		categories = select_from_categories()
 		if len(users) > 0:
 			session['email'] = email
