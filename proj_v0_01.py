@@ -81,7 +81,7 @@ def select_from_articles(select):
 	articles = []
 	try:
 		cur = conn.cursor()
-		sql_select = f"SELECT {select} FROM ARTICLES, SOURCES, CATEGORIES WHERE ARTICLES.source_id=SOURCES.id AND ARTICLES.category_id=CATEGORIES.id"	
+		sql_select = f"SELECT {select} FROM ARTICLES1, SOURCES1, CATEGORIES1 WHERE ARTICLES1.source_id=SOURCES1.id AND ARTICLES1.category_id=CATEGORIES1.id"	
 		cur.execute(sql_select)
 		articles = cur.fetchall()
 	except Exception as err:
@@ -96,7 +96,7 @@ def select_from_articles_where(select, where, *args):
 	articles = []
 	try:
 		cur = conn.cursor()
-		sql_select = f"SELECT {select} FROM ARTICLES, SOURCES, CATEGORIES WHERE ARTICLES.source_id=SOURCES.id AND ARTICLES.category_id=CATEGORIES.id AND {where}"
+		sql_select = f"SELECT {select} FROM ARTICLES1, SOURCES1, CATEGORIES1 WHERE ARTICLES1.source_id=SOURCES1.id AND ARTICLES1.category_id=CATEGORIES1.id AND {where}"
 		data = args
 		cur.execute(sql_select, data)
 		articles = cur.fetchall()
@@ -137,7 +137,7 @@ def index():
 		if len(users) <= 0:
 			err.append("Username OR password is incorrect.")
 			return render_template('login.html', errors=err)
-		articles = select_from_articles('articles.id, sources.name, categories.name, author, title, description, url, urlToImage, publishedAt, content')
+		articles = select_from_articles('articles1.id, sources1.name, categories1.name, author, title, description, url, urlToImage, publishedAt, content')
 		categories = select_from_categories()
 		return render_template('home.html', session=session, users=users, articles=articles, categories=categories)
 	else:
@@ -155,7 +155,7 @@ def category_page(name):
 			err.append("Username OR password is incorrect.")
 			return render_template('login.html', errors=err)
 		categories = select_from_categories()
-		articles = select_from_articles_where('articles.id, sources.name, categories.name, author, title, description, url, urlToImage, publishedAt, content', 'categories.name=:1', name)
+		articles = select_from_articles_where('articles1.id, sources1.name, categories1.name, author, title, description, url, urlToImage, publishedAt, content', 'categories1.name=:1', name)
 		return render_template('home.html', session=session, users=users, categories=categories, articles=articles)
 	else:
 		return redirect('/login')
@@ -171,8 +171,8 @@ def search():
 			q = request.args['q'].lower()
 			users = select_user_where(email, password)
 			articles = select_from_articles_where(
-				'articles.id, sources.name, categories.name, author, title, description, url, urlToImage, publishedAt, content', 
-				f"(LOWER(title) LIKE '%{q}%' OR LOWER(description) LIKE '%{q}%' OR LOWER(categories.name) LIKE '%{q}%' OR LOWER(sources.name) LIKE '%{q}%' OR LOWER(author) LIKE '%{q}%' OR LOWER(content) LIKE '%{q}%' )"
+				'articles1.id, sources1.name, categories1.name, author, title, description, url, urlToImage, publishedAt, content', 
+				f"(LOWER(title) LIKE '%{q}%' OR LOWER(description) LIKE '%{q}%' OR LOWER(categories1.name) LIKE '%{q}%' OR LOWER(sources1.name) LIKE '%{q}%' OR LOWER(author) LIKE '%{q}%' OR LOWER(content) LIKE '%{q}%' )"
 			)
 			categories = select_from_categories()
 			return render_template('home.html', session=session, users=users, articles=articles, categories=categories)

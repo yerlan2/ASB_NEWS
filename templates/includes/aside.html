@@ -1,11 +1,11 @@
 <link rel="stylesheet" href="{{ url_for('static', filename='css/includes/aside.css') }}">
 <aside class="left__part">
-    <a {% if request.host_url==request.url %}class="active"{% endif %} href="{{ request.host_url }}/">All news</a>
+    <a {% if request.host_url==request.url %}class="active"{% endif %} href="{{ request.host_url }}">All news</a>
     <hr>
-    <a {% if request.host_url+'search?q=COVID-19'==request.url %}class="active"{% endif %} href="{{ request.host_url }}/search?q=COVID-19">COVID-19</a>
+    <a {% if request.host_url+'search?q=COVID-19'==request.url %}class="active"{% endif %} href="{{ request.host_url }}search?q=COVID-19">COVID-19</a>
     <hr>
     {% for category in categories %}
-        <a {% if request.host_url+'c/'+category[1]==request.url %}class="active"{% endif %} href="{{ request.host_url }}/c/{{ category[1] }}">{{ category[1].capitalize() }}</a>
+        <a {% if request.host_url+'c/'+category[1]==request.url %}class="active"{% endif %} href="{{ request.host_url }}c/{{ category[1] }}">{{ category[1].capitalize() }}</a>
     {% endfor %}
     <hr>
     <a class="bttm" href="#">About ASB</a>
