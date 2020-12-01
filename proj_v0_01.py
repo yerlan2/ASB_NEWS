@@ -105,6 +105,23 @@ def select_from_articles_where(select, where, *args):
 		cur.close()
 	return articles
 
+def insert_into_articles(*user_data):
+	err = []
+	source, category, author, title, description, url, urlToImage, content = user_data
+	try:
+		cur = conn.cursor()
+		user_data = (source, category, author, title, description, url, urlToImage, content)
+		cur.callproc('articles_pkg.insert_article', user_data)
+	except cx_Oracle.IntegrityError as e:
+		errorObj, = e.args
+		err.append("ERROR: " + str(errorObj))
+		print('ERROR while inserting the data ', errorObj)
+	else:
+		print('Insert Completed.')
+	finally:
+		cur.close()
+	return err
+
 
 @app.route('/')
 @app.route('/home')
@@ -231,8 +248,22 @@ def logout():
 @app.route('/admin', methods=['POST', 'GET'])
 def admin():
 	err = []
+	categories = select_from_categories()
 	if request.method == 'POST':
-		print('Hello')
+		source = request.form['source']
+		category = request.form['category']
+		author = request.form['author']
+		title = request.form['title']
+		description = request.form['description']
+		url = request.form['url']
+		urlToImage = request.form['urlToImage']
+		# publishedAt = request.form['publishedAt']
+		content = request.form['content']
+		err = insert_into_articles(source, category, author, title, description, url, urlToImage, content)
+		if len(err) <= 0:
+			return redirect(url_for('index'))
+		else:
+			return render_template('admin.html', categories=categories, errors=err)
 	else:
 		if 'email' in session \
 		and 'password' in session \

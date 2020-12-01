@@ -9,15 +9,12 @@ header {
 }
 .header__inner {
     display: grid;
-    grid-template-columns: 20% 80%;
+    grid-template-columns: 20% 55% 25%;
     align-items: center;
 }
 .header__inner .part {
     display: flex;
     align-items: center;
-}
-.header__inner .part.main__part {
-    justify-content: space-between;
 }
 
 
@@ -51,6 +48,7 @@ header {
 .header__inner .search {
     display: flex;
     align-items: center;
+    width: 100%;
 }
 
 
@@ -73,6 +71,7 @@ header {
     padding: 8px 12px;
     margin-left: 8px;
     outline: none;
+    width: 100%;
 }
 .header__inner .header-option {
     color: #3c4043;

@@ -73,13 +73,8 @@ CREATE TABLE ARTICLES (
 
 CREATE OR REPLACE PACKAGE users_pkg AS
   CURSOR users_cur IS
-  SELECT
-    id,
-    email,
-    first_name,
-    last_name
-  FROM
-    users;
+    SELECT id, email, first_name, last_name
+    FROM users;
 
   TYPE users_array IS
     TABLE OF users_cur%rowtype;
@@ -126,46 +121,81 @@ END;
 /
 
 
-CREATE OR REPLACE PROCEDURE insert_article (
-    source      VARCHAR2, 
-    category    VARCHAR2, 
-    author      VARCHAR2,
-    title       VARCHAR2,
-    description VARCHAR2,
-    url         VARCHAR2,
-    urlToImage  VARCHAR2,
-    publishedAt DATE,
-    content     VARCHAR2
-) IS 
+CREATE OR REPLACE PACKAGE articles_pkg AS
+  -- CURSOR articles_cur IS
+  --   SELECT id, source, category,author, title, description, url, urlToImage, publishedAt, content
+  --   FROM articles;
+
+  -- TYPE articles_array IS
+  --   TABLE OF articles_cur%rowtype;
+
+  -- FUNCTION select_all_users RETURN users_array
+  --   PIPELINED;
+
+  PROCEDURE insert_article (
+    source      sources.name%TYPE, 
+    category    categories.name%TYPE,
+    author      articles.author%TYPE, 
+    title       articles.title%TYPE, 
+    description articles.description%TYPE, 
+    url         articles.url%TYPE, 
+    urlToImage  articles.urlToImage%TYPE, 
+    -- publishedAt VARCHAR2, 
+    content     articles.content%TYPE
+  );
+END;
+/
+
+CREATE OR REPLACE PACKAGE BODY articles_pkg AS
+  -- FUNCTION select_all_users RETURN users_array
+  --   PIPELINED
+  -- IS
+  -- BEGIN
+  --   FOR user IN users_cur LOOP PIPE ROW ( user );
+  --   END LOOP;
+  --   return;
+  -- END;
+
+  PROCEDURE insert_article (
+    source      sources.name%TYPE, 
+    category    categories.name%TYPE, 
+    author      articles.author%TYPE,
+    title       articles.title%TYPE,
+    description articles.description%TYPE,
+    url         articles.url%TYPE,
+    urlToImage  articles.urlToImage%TYPE,
+    -- publishedAt VARCHAR2,
+    content     articles.content%TYPE
+  ) IS 
     source_id NUMBER := NULL;
     category_id NUMBER := NULL;
-BEGIN 
+  BEGIN 
     BEGIN 
-        SELECT id INTO source_id FROM SOURCES WHERE name=source;
+      SELECT id INTO source_id FROM SOURCES WHERE name=source;
     Exception
-        WHEN no_data_found THEN
-            source_id := NULL;
+      WHEN no_data_found THEN source_id := NULL;
     END;
 
     BEGIN 
-        SELECT id INTO category_id FROM CATEGORIES WHERE name=category;
+      SELECT id INTO category_id FROM CATEGORIES WHERE name=category;
     Exception
-        WHEN no_data_found THEN
-            category_id := NULL;
+      WHEN no_data_found THEN category_id := NULL;
     END;
 
     IF source_id IS NULL THEN
-        INSERT INTO SOURCES VALUES(SOURCES_SEQ.NEXTVAL, source);
-        source_id := SOURCES_SEQ.currval;
+      INSERT INTO SOURCES VALUES(SOURCES_SEQ.NEXTVAL, source);
+      source_id := SOURCES_SEQ.currval;
     END IF;
 
     IF category_id IS NULL THEN
-        INSERT INTO SOURCES VALUES(CATEGORIES_SEQ.NEXTVAL, category);
-        category_id := CATEGORIES_SEQ.currval;
+      INSERT INTO CATEGORIES VALUES(CATEGORIES_SEQ.NEXTVAL, category);
+      category_id := CATEGORIES_SEQ.currval;
     END IF;
 
-    INSERT INTO ARTICLES VALUES(ARTICLES_SEQ.NEXTVAL, source_id, category_id, author, title, description, url, urlToImage, publishedAt, content);
+    INSERT INTO ARTICLES VALUES(ARTICLES_SEQ.NEXTVAL, source_id, category_id, author, title, description, url, urlToImage, SYSDATE, content);
     COMMIT;
+  END;
 END;
 /
+
 

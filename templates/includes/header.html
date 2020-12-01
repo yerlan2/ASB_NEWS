@@ -11,25 +11,23 @@
                 </div>
                 <a class="logo" href="#"><span>ASB</span> NEWS</a>
             </div>
-            <div class="part main__part">
-                <form method="get" action="/search" class="search">
-                    <button>Search</button>
-                    <input name="q" type="search" size="64" placeholder="Search...">
-                </form>
-                <div>
-                    {% if 'email' in session %}
-                        {% if session['email']=='admin@email.com' %}
-                            <a href="/admin" class="header-option">Admin</a> |
-                        {# 
-                        {% else %}    
-                            <a href="#" class="header-option">#</a> 
-                        #}
-                        {% endif %}
-                        <a href="/logout" class="header-option">Logout</a>
-                    {% else %}
-                        <a href="/login" class="header-option">Login</a> | <a href="/register" class="header-option">Register</a>
+            <form method="get" action="/search" class="search">
+                <button>Search</button>
+                <input name="q" type="search" placeholder="Search...">
+            </form>
+            <div style="text-align: right;">
+                {% if 'email' in session %}
+                    {% if session['email']=='admin@email.com' %}
+                        <a href="/admin" class="header-option">Admin</a> |
+                    {# 
+                    {% else %}    
+                        <a href="#" class="header-option">#</a> 
+                    #}
                     {% endif %}
-                </div>
+                    <a href="/logout" class="header-option">Logout</a>
+                {% else %}
+                    <a href="/login" class="header-option">Login</a> | <a href="/register" class="header-option">Register</a>
+                {% endif %}
             </div>
         </div>
 
