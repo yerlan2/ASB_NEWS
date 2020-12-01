@@ -13,6 +13,7 @@ app.secret_key = "secret_key"
 
 
 def select_from_users():
+	users = []
 	try:
 		cur = conn.cursor()
 		sql_select = "SELECT * FROM TABLE ( users_pkg.select_all_users() )"
@@ -221,8 +222,9 @@ def login():
 
 @app.route('/logout')
 def logout():
-	del session['email']
-	del session['password']
+	if 'email' in session and 'password' in session:
+		del session['email']
+		del session['password']
 	return redirect('/login')
 
 
