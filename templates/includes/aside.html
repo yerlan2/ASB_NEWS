@@ -1,6 +1,7 @@
 <link rel="stylesheet" href="{{ url_for('static', filename='css/includes/aside.css') }}">
 <aside class="left__part">
     <a {% if request.host_url==request.url %}class="active"{% endif %} href="{{ request.host_url }}">All news</a>
+    <a {% if request.host_url+'favorite'==request.url %}class="active"{% endif %} href="{{ request.host_url }}favorite">Favorite</a>
     <hr>
     <a {% if request.host_url+'search?q=COVID-19'==request.url %}class="active"{% endif %} href="{{ request.host_url }}search?q=COVID-19">COVID-19</a>
     <hr>

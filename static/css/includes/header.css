@@ -32,7 +32,7 @@ header {
     color: #333;
     font-weight: bold;
     text-decoration: none;
-    margin-left: 16px;
+    /* margin-left: 16px; */
 }
 .header__inner a.logo span {
     color: #5050ff;

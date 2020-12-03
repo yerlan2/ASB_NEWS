@@ -1,5 +1,5 @@
 import cx_Oracle
-from flask import Flask, request, session, render_template, redirect, url_for
+from flask import Flask, request, session, render_template, redirect, url_for, make_response, jsonify
 from hashlib import sha256
 
 try:
@@ -81,7 +81,7 @@ def select_from_articles(select):
 	articles = []
 	try:
 		cur = conn.cursor()
-		sql_select = f"SELECT {select} FROM ARTICLES1, SOURCES1, CATEGORIES1 WHERE ARTICLES1.source_id=SOURCES1.id AND ARTICLES1.category_id=CATEGORIES1.id"	
+		sql_select = f"SELECT {select} FROM ARTICLES1, SOURCES1, CATEGORIES1 WHERE ARTICLES1.source_id=SOURCES1.id AND ARTICLES1.category_id=CATEGORIES1.id ORDER BY publishedAt DESC"	
 		cur.execute(sql_select)
 		articles = cur.fetchall()
 	except Exception as err:
@@ -92,12 +92,12 @@ def select_from_articles(select):
 		cur.close()
 	return articles
 
-def select_from_articles_where(select, where, *args):
+def select_from_articles_where(select, where, *data):
 	articles = []
 	try:
 		cur = conn.cursor()
-		sql_select = f"SELECT {select} FROM ARTICLES1, SOURCES1, CATEGORIES1 WHERE ARTICLES1.source_id=SOURCES1.id AND ARTICLES1.category_id=CATEGORIES1.id AND {where}"
-		data = args
+		sql_select = f"SELECT {select} FROM ARTICLES1, SOURCES1, CATEGORIES1 WHERE ARTICLES1.source_id=SOURCES1.id AND ARTICLES1.category_id=CATEGORIES1.id AND {where} ORDER BY publishedAt DESC"
+		print(sql_select)
 		cur.execute(sql_select, data)
 		articles = cur.fetchall()
 	except Exception as err:
@@ -126,6 +126,58 @@ def insert_into_articles(*user_data):
 	return err
 
 
+def insert_into_users_articles(*user_data):
+	err = []
+	user_id, article_id = user_data
+	try:
+		cur = conn.cursor()
+		user_data = (user_id, article_id)
+		cur.callproc('users_articles_pkg.insert_users_articles', user_data)
+	except cx_Oracle.IntegrityError as e:
+		errorObj, = e.args
+		print('ERROR while inserting the data ', errorObj)
+		err.append("Star already exists.")
+	else:
+		print('Insert Completed.')
+	finally:
+		cur.close()
+	return err
+
+def delete_from_users_articles(*user_data):
+	err = []
+	user_id, article_id = user_data
+	try:
+		cur = conn.cursor()
+		user_data = (user_id, article_id)
+		cur.callproc('users_articles_pkg.delete_users_articles', user_data)
+	except cx_Oracle.IntegrityError as e:
+		errorObj, = e.args
+		print('ERROR while inserting the data ', errorObj)
+		err.append("Star already exists.")
+	else:
+		print('Insert Completed.')
+	finally:
+		cur.close()
+	return err
+
+
+def select_users_articles_where(*user_id_credentials):
+	users_articles = []
+	try:
+		cur = conn.cursor()
+		p_user_id = ':1'
+		sql_select = f"SELECT * FROM TABLE ( users_articles_pkg.select_users_articles_where({p_user_id}) )"
+		cur.execute(sql_select, user_id_credentials)
+		users_articles = cur.fetchall()
+	except Exception as err:
+		print('Exception occured while fetching the records ', err)
+	else:
+		print('Query Completed.')
+	finally:
+		cur.close()
+	return users_articles
+
+
 @app.route('/')
 @app.route('/home')
 def index():
@@ -137,9 +189,13 @@ def index():
 		if len(users) <= 0:
 			err.append("Username OR password is incorrect.")
 			return render_template('login.html', errors=err)
+		users_articles = select_users_articles_where(users[0][0])
+		articles_id_ls = []
+		for x in users_articles:
+			articles_id_ls.append(x[1])
 		articles = select_from_articles('articles1.id, sources1.name, categories1.name, author, title, description, url, urlToImage, publishedAt, content')
 		categories = select_from_categories()
-		return render_template('home.html', session=session, users=users, articles=articles, categories=categories)
+		return render_template('home.html', session=session, users=users, articles=articles, categories=categories, articles_id_ls=articles_id_ls)
 	else:
 		return redirect('/login')
 
@@ -154,9 +210,13 @@ def category_page(name):
 		if len(users) <= 0:
 			err.append("Username OR password is incorrect.")
 			return render_template('login.html', errors=err)
+		users_articles = select_users_articles_where(users[0][0])
+		articles_id_ls = []
+		for x in users_articles:
+			articles_id_ls.append(x[1])
 		categories = select_from_categories()
 		articles = select_from_articles_where('articles1.id, sources1.name, categories1.name, author, title, description, url, urlToImage, publishedAt, content', 'categories1.name=:1', name)
-		return render_template('home.html', session=session, users=users, categories=categories, articles=articles)
+		return render_template('home.html', session=session, users=users, categories=categories, articles=articles, articles_id_ls=articles_id_ls)
 	else:
 		return redirect('/login')
 
@@ -170,12 +230,19 @@ def search():
 		if request.method == 'GET':
 			q = request.args['q'].lower()
 			users = select_user_where(email, password)
+			if len(users) <= 0:
+				err.append("Username OR password is incorrect.")
+				return render_template('login.html', errors=err)
+			users_articles = select_users_articles_where(users[0][0])
+			articles_id_ls = []
+			for x in users_articles:
+				articles_id_ls.append(x[1])
 			articles = select_from_articles_where(
 				'articles1.id, sources1.name, categories1.name, author, title, description, url, urlToImage, publishedAt, content', 
 				f"(LOWER(title) LIKE '%{q}%' OR LOWER(description) LIKE '%{q}%' OR LOWER(categories1.name) LIKE '%{q}%' OR LOWER(sources1.name) LIKE '%{q}%' OR LOWER(author) LIKE '%{q}%' OR LOWER(content) LIKE '%{q}%' )"
 			)
 			categories = select_from_categories()
-			return render_template('home.html', session=session, users=users, articles=articles, categories=categories)
+			return render_template('home.html', session=session, users=users, articles=articles, categories=categories, articles_id_ls=articles_id_ls)
 	else:
 		return redirect('/login')
 
@@ -260,6 +327,73 @@ def admin():
 			return render_template('admin.html', session=session, categories=categories)
 		else:
 			return redirect('/logout')
+
+
+@app.route('/addstar', methods=['POST', 'GET'])
+def addstar():
+	if request.method == 'POST':
+		req = request.get_json()
+		print(req)
+		err = insert_into_users_articles(
+			req['user_id'], req['article_id']
+		)
+		if len(err) <= 0:
+			res = make_response(jsonify({'message':"ok"}), 200)
+			return res;
+		else:
+			res = make_response(jsonify({'message':"not ok"}), 400)
+			return res;
+	else:
+		res = make_response(jsonify({'message':"not Post"}), 400)
+		return res;
+
+
+@app.route('/removestar', methods=['POST', 'GET'])
+def removestar():
+	if request.method == 'POST':
+		req = request.get_json()
+		print(req)
+		err = delete_from_users_articles(
+			req['user_id'], req['article_id']
+		)
+		if len(err) <= 0:
+			res = make_response(jsonify({'message':"ok"}), 200)
+			return res;
+		else:
+			res = make_response(jsonify({'message':"not ok"}), 400)
+			return res;
+	else:
+		res = make_response(jsonify({'message':"not Post"}), 400)
+		return res;
+
+
+@app.route('/favorite')
+def favorite():
+	err = []
+	articles = []
+	if 'email' in session and 'password' in session:
+		email = session['email']
+		password = session['password']
+		users = select_user_where(email, password)
+		if len(users) <= 0:
+			err.append("Username OR password is incorrect.")
+			return render_template('login.html', errors=err)
+		users_articles = select_users_articles_where(users[0][0])
+		if len(users_articles) > 0:
+			articles_num = ':1'
+			for i in range(2, len(users_articles)+1):
+				articles_num += ', :'+ str(i)
+			articles_id_ls = []
+			for x in users_articles:
+				articles_id_ls.append(x[1])
+			articles = select_from_articles_where('articles1.id, sources1.name, categories1.name, author, title, description, url, urlToImage, publishedAt, content', f'articles1.id IN ({articles_num})', *articles_id_ls)
+			categories = select_from_categories()
+			return render_template('home.html', session=session, users=users, articles=articles, categories=categories, articles_id_ls=articles_id_ls)
+		else:
+			categories = select_from_categories()
+			return render_template('home.html', session=session, users=users, articles=articles, categories=categories)
+	else:
+		return redirect('/login')
 
 
 if __name__=="__main__":

@@ -39,32 +39,70 @@
         [0]id,          [1]source,  [2]category,    [3]author,      [4]title, 
         [5]description, [6]url,     [7]urlToImage,  [8]publishedAt, [9]content,
     -->
+    <input type="hidden" id="user_id" name="user_id" value="{{ users[0][0] }}">
     <div class="articles">
-        {% for article in articles %}
-            <article class="news__article">
-                <input type="hidden" name="id" value="{{ article[0] }}">
-                <div class="info-main">
-                    <div>
+        {% if articles|length > 0 %}
+            {% for article in articles %}
+                <article class="news__article">
+                    <div class="info-main">
                         <div>
                             <a class="title" href="{{ article[6] }}" target="_blank">{{ article[4] }}</a>
-                            {{ article[2].capitalize() }} &#x25CF; {{ article[1] }} &#x25CF; {{ article[8].strftime('%d.%m.%Y') }}
+                            <div class="info-main-content">
+                                <input type="hidden" id="article_id" name="id" value="{{ article[0] }}">
+                                <div class="star{% if article[0] in articles_id_ls %} active{% endif %}" onclick="star_active(event)">{% if article[0] in articles_id_ls %}&#9733;{% else %}&#9734;{% endif %}</div>
+                                {{ article[2].capitalize() }} &#x25CF; {{ article[1] }} &#x25CF; {{ article[8].strftime('%d.%m.%Y') }}
+                            </div>
+                            <div class="show_more" onclick="show_more(event)">MORE</div>
                         </div>
-                        <div class="show_more" onclick="show_more(event)">MORE</div>
+                        <div class="image">
+                            <img src="{{ article[7] }}" alt="{{ article[0] }}">
+                        </div>
                     </div>
-                    <div class="image">
-                        <img src="{{ article[7] }}" alt="{{ article[0] }}">
+                    <div class="info-more">
+                        {{ article[5] }}
                     </div>
-                </div>
-                <div class="info-more">
-                    {{ article[5] }}
-                </div>
-            </article>
-        {% endfor %}
+                </article>
+            {% endfor %}
+        {% else %}
+            <h2 style="text-align:center; margin-top:60px; color:#949494;">No articles</h2>
+        {% endif %}
     </div>
     <script>
         function show_more(event) {
             let infoMore = event.currentTarget.parentNode.parentNode.parentNode.querySelector('.info-more');
             infoMore.classList.toggle('show');
+        }
+        function star_active(event) {
+            let starActive = event.currentTarget,
+                userId = document.querySelector('#user_id');
+            starActive.classList.toggle('active');
+            if (starActive.classList.contains('active')) {
+                starActive.innerHTML = "&#9733;";
+                fetch('/addstar', {
+                    method: "POST",
+                    body: JSON.stringify({
+                        'user_id':userId.value, 
+                        'article_id':starActive.parentNode.querySelector('input#article_id').value
+                    }),
+                    headers: {"Content-type": "application/json; charset=UTF-8"}
+                })
+                .then(response => response.json()) 
+                .then(json => console.log(json))
+                .catch(err => console.log(err));
+            } else {
+                starActive.innerHTML = "&#9734;";
+                fetch('/removestar', {
+                    method: "POST",
+                    body: JSON.stringify({
+                        'user_id':userId.value, 
+                        'article_id':starActive.parentNode.querySelector('input#article_id').value
+                    }),
+                    headers: {"Content-type": "application/json; charset=UTF-8"}
+                })
+                .then(response => response.json()) 
+                .then(json => console.log(json))
+                .catch(err => console.log(err));
+            }
         }
     </script>
 {% endblock main %}

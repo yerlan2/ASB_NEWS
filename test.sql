@@ -15,11 +15,11 @@ CREATE OR REPLACE PROCEDURE create_log_trg(p_table_name VARCHAR2) IS
 	create_log VARCHAR2(32767);
 	create_trg VARCHAR2(32767);
 
-	CURSOR column_name_cur IS
+	CURSOR column_name_cur IS 
 		SELECT column_name, data_type, data_length 
 		FROM all_tab_cols
 		WHERE table_name = p_table_name;
-BEGIN
+BEGIN 
 	-- CREATE LOG TABLE
 	create_log := 'CREATE TABLE '||p_table_name||'_LOG(ID NUMBER, OPERATION_DATE DATE, ';
 	FOR i IN column_name_cur LOOP
@@ -68,25 +68,6 @@ END;
 /
 
 
-/*
-CREATE SEQUENCE CATEGORIES1_LOG_SEQ;
-
-CREATE TABLE CATEGORIES1(
-  id      NUMBER PRIMARY KEY,
-  name    VARCHAR2(255) NOT NULL UNIQUE
-);
-DESC CATEGORIES1;
-DESC CATEGORIES1_LOG;
-
-DROP TABLE CATEGORIES1_LOG;
-DROP TABLE CATEGORIES1;
-
-DROP SEQUENCE CATEGORIES1_LOG_SEQ;
-*/
-
-
-
-
 DROP TABLE USERS1_LOG;
 DROP TABLE USERS1;
 DROP SEQUENCE USERS1_LOG_SEQ;
@@ -98,7 +79,7 @@ CREATE SEQUENCE USERS1_LOG_SEQ;
 CREATE TABLE USERS1 (
   id          NUMBER PRIMARY KEY,
   email       VARCHAR2(255) NOT NULL UNIQUE,
-  password    VARCHAR2(510) NOT NULL,
+  password    VARCHAR2(511) NOT NULL,
   first_name  VARCHAR2(255) NOT NULL,
   last_name   VARCHAR2(255) 
 );
@@ -155,6 +136,19 @@ CREATE TABLE ARTICLES1 (
 );
 
 
+DROP TABLE USERS1_ARTICLES1;
+DROP SEQUENCE USERS1_ARTICLES1_LOG_SEQ;
+
+CREATE SEQUENCE USERS1_ARTICLES1_LOG_SEQ;
+CREATE TABLE USERS1_ARTICLES1 (
+  user_id NUMBER NOT NULL,
+  FOREIGN KEY(user_id) REFERENCES USERS1(id),
+  article_id NUMBER NOT NULL,
+  FOREIGN KEY(article_id) REFERENCES ARTICLES1(id)
+);
+
+
+
 CREATE OR REPLACE PACKAGE users_pkg AS
   CURSOR users_cur IS
     SELECT id, email, first_name, last_name
@@ -170,15 +164,9 @@ CREATE OR REPLACE PACKAGE users_pkg AS
     p_email      users1.email%TYPE,
     p_password   users1.password%TYPE
   ) IS
-  SELECT
-    id,
-    email,
-    first_name,
-    last_name
-  FROM
-    users1
-  WHERE
-    email = p_email
+  SELECT id, email, first_name, last_name
+  FROM users1
+  WHERE email = p_email
     AND password = p_password;
 
   TYPE user_array IS
@@ -343,6 +331,40 @@ CREATE OR REPLACE PACKAGE BODY categories_pkg AS
 
 END;
 /
+
+CREATE OR REPLACE PACKAGE users_articles_pkg AS
+  CURSOR users_articles_cur (
+    p_user_id     users1_articles1.user_id%TYPE
+    -- p_article_id  users1_articles1.article_id%TYPE
+  ) IS
+  SELECT user_id, article_id 
+  FROM users1_articles1 
+  WHERE user_id = p_user_id;
+
+  TYPE users_articles_array IS
+    TABLE OF users_articles_cur%rowtype;
+
+  FUNCTION select_users_articles_where (
+    p_user_id     users1_articles1.user_id%TYPE
+  ) RETURN users_articles_array 
+    PIPELINED;
+END;
+/
+
+CREATE OR REPLACE PACKAGE BODY users_articles_pkg AS
+  FUNCTION select_users_articles_where (
+    p_user_id     users1_articles1.user_id%TYPE
+  ) RETURN users_articles_array
+    PIPELINED
+  IS
+  BEGIN
+    FOR user_article IN users_articles_cur(p_user_id) LOOP PIPE ROW ( user_article );
+    END LOOP;
+    return;
+  END;
+END;
+/
+
 /* */
 
 
