@@ -3,7 +3,7 @@ from flask import Flask, request, session, render_template, redirect, url_for, m
 from hashlib import sha256
 
 try:
-    conn = cx_Oracle.connect('hr/hr@//localhost:1521/XE')
+    conn = cx_Oracle.connect('ora_proj2/hr@//localhost:1521/XE')
 except Exception as err:
     print('Error while creating the connection ', err)
 
@@ -331,7 +331,6 @@ def admin():
 def addstar():
 	if request.method == 'POST':
 		req = request.get_json()
-		print(req)
 		err = insert_into_users_articles(
 			req['user_id'], req['article_id']
 		)
@@ -393,16 +392,19 @@ def favorite():
 	else:
 		return redirect('/login')
 
+
 @app.route('/predict', methods=['POST'])
 def predict_category():
-	req = request.get_json()
-	print(req)
+	if request.method == 'POST':
+		req = request.get_json()
+		from ml import predict
+		category = predict(req['content'])
+		res = make_response(jsonify({'category': category[0]}), 200)
+		return res
+	else:
+		res = make_response(jsonify({'message':"not Post"}), 400)
+		return res;
 
-	from ml import predict
-	category = predict(req)
-
-	res = make_response(jsonify({'category': category}), 200)
-	return res
 
 import numpy as np
 import pandas as pd

@@ -23,6 +23,26 @@ table.authorization-table textarea {
     width: 100%;
 }
 
+
+.select__category {
+    display: flex;
+    align-items: center;
+    margin: 4px 0 4px 8px;
+}
+.select__category select,
+.select__category button {
+    padding: 6px;
+    border: 1px solid #949494;
+    border-radius: 6px;
+    width: 100%;
+    outline: none;
+}
+.select__category button {
+    white-space: nowrap;
+    margin-left: 6px;
+}
+
+
 button.authorization-button {
     display: block;
     background: #8383ff;
