@@ -397,7 +397,7 @@ def favorite():
 
 import numpy as np
 import pandas as pd
-from sklearn.feature_extraction.text import TfidfVectorizer
+from sklearn.feature_extraction.text import TfidfVectorizer, CountVectorizer
 from sklearn.metrics.pairwise import linear_kernel, cosine_similarity
 
 
@@ -431,7 +431,7 @@ def recommendation():
 			articles = select_from_articles('articles1.id, sources1.name, categories1.name, author, title, description, url, urlToImage, publishedAt, content')
 			df = pd.DataFrame(np.array(articles), columns=['id', 'source', 'category', 'author', 'title', 'description', 'url', 'urlToImage', 'publishedAt', 'content'])
 			df = df.set_index('id')
-			df['text'] = df['category'] + df['title'] + df['description'] + df['content']
+			df['text'] = df['category'] + " " + df['title'] + " " + df['description']
 			tf = TfidfVectorizer(analyzer='word',ngram_range=(1, 2),min_df=0, stop_words='english')
 			tfidf_matrix = tf.fit_transform(df['text'])
 			cosine_sim = linear_kernel(tfidf_matrix, tfidf_matrix)
