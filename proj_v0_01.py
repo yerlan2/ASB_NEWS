@@ -259,7 +259,7 @@ def register():
 			email, password, first_name, last_name
 		)
 		if len(err) <= 0:
-			return redirect(url_for('register'))
+			return redirect(url_for('login'))
 		else:
 			return render_template('register.html', categories=categories, errors=err)
 	else:
