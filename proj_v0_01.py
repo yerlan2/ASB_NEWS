@@ -3,7 +3,7 @@ from flask import Flask, request, session, render_template, redirect, url_for, m
 from hashlib import sha256
 
 try:
-    conn = cx_Oracle.connect('ora_proj2/hr@//localhost:1521/XE')
+    conn = cx_Oracle.connect('hr/hr@//localhost:1521/XE')
 except Exception as err:
     print('Error while creating the connection ', err)
 
@@ -311,7 +311,6 @@ def admin():
 		description = request.form['description']
 		url = request.form['url']
 		urlToImage = request.form['urlToImage']
-		# publishedAt = request.form['publishedAt']
 		content = request.form['content']
 		err = insert_into_articles(source, category, author, title, description, url, urlToImage, content)
 		if len(err) <= 0:
@@ -395,6 +394,16 @@ def favorite():
 	else:
 		return redirect('/login')
 
+@app.route('/predict', methods=['POST'])
+def predict_category():
+	req = request.get_json()
+	print(req)
+
+	from ml import predict
+	category = predict(req)
+
+	res = make_response(jsonify({'category': category}), 200)
+	return res
 
 if __name__=="__main__":
 	app.run(debug=True)
